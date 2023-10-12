@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Viaggiare in Puglia</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+  <style> 
+
+  a:hover{
+    text-decoration: none;
+    background-color: #FEC30A;
+    color: black;
+  }
+
+  a{
+    font-weight: bold;
+    color: #FEC30A;
+  }
+
+#map {
+        width: 100%;
+        height: 800px;
+        margin-bottom: 50px;
+        margin-top: 50px;
+      }
+
+  .marker {
+  background-image: url('pinpoint.png');
+  background-size: cover;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+h3,h5{
+  font-size: 2rem;
+}
+
+.libere{
+  background-color: green;
+  background-size: cover;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.mapboxgl-popup {
+  max-width: 200px;
+}
+
+.mapboxgl-popup-content {
+  text-align: center;
+  font-family: 'Open Sans', sans-serif;
+}
+
+  navbar navbar-default {
+    position: relative;
+    top: 20px;
+
+}
+    .navbar-default .navbar-nav>li>a {
+      color: white;
+      font-family: 'Trebuchet MS', sans-serif;
+      font-size: 18px;
+    }
+
+    .navbar-default .navbar-brand {
+    color: white;
+  }
+
+    .jumbotron {
+      background-color: #FEC30A;
+      background-image: url(https://cdn.pixabay.com/photo/2016/11/14/22/18/beach-1824855_1280.jpg);
+      background-repeat: no-repeat;
+      background-size: 100%;
+      background-position: top;
+      color: white;
+      padding: 0;
+      position: relative;
+      border: 0;
+      border: solid black 2px;
+       font-family: 'Trebuchet MS', sans-serif;
+      text-shadow: 2px 2px 4px #000000;
+      margin-bottom: 0;
+      border-bottom: 0;
+    }
+    .jumbotron h1 {
+      padding: 2%;
+    }
+    .container-fluid {
+      color: white;
+      text-align: center;
+
+    }
+    .col-sm-4 {
+      border-left: 2%;
+      border: solid #FEC30A 2px;
+      text-align: center;
+    }
+    footer {
+      color: white;
+      font-family: arial;
+      font-size: 20px;
+      bottom: 0px;
+      position: fixed;
+      text-align: center;
+      background-color: #FEC30A;
+      color: white;
+      width: 100%;
+    }
+
+    .col-sm-4 {
+      height: 60%;
+    }
+
+    .col-sm-4 p {
+      padding-bottom: 5px;
+    }
+
+    .form-check-label {
+      font-size: 3rem;
+      text-transform: uppercase;
+    }
+
+    #libere, #stabilimenti{
+      width: 100px !important;
+      height: 50px !important;
+      margin-right: 10px;
+      outline:none;
+    }
+
+    #libere:checked, #stabilimenti:checked{
+      background-color: #FEC30A !important;
+      border:none;
+    }
+
+  </style> 
+
+</head>
+<body>
+
+
+
+
+<div class="jumbotron text-center">
+  <h1>Le spiagge della Puglia!</h1>
+  <h2 style="bottom: 25px;position: relative">Mappa delle spiagge libere sul nostro territorio...</h2> 
+</div>
+
+<div class="container mt-5 text-center">
+  <div class="row">
+    <div class="col"><div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="libere" onclick="getLibere()">
+    <label class="form-check-label" for="flexSwitchCheckDefault">Spiagge libere</label>
+  </div></div>
+    <div class="col"><div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="stabilimenti" onclick="fetchStabilimenti()">
+    <label class="form-check-label" for="flexSwitchCheckChecked">Spiagge private</label>
+  </div></div>
+  </div>
+  
+  
+</div>
+
+  <div class="container">
+    <div id = "map"></div>
+    <!--<div id='map'></div>-->
+</div>
+
+  
+
+  <footer class="footer fixed-bottom text-center mt-auto" id="footer">
+   <p style="font-family: arial"> Copyright 2023-24 Regione Puglia </p>
+ </footer>
+<script>
+
+  mapboxgl.accessToken = 'pk.eyJ1IjoiZ3BlZHJvbmNlbGxpIiwiYSI6ImNsbm14YzRpdTAwcmEyaW1weXV0eHlicDkifQ.Jpc-9lHeWU89Aa0iX8mhIQ';
+
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: "mapbox://styles/mapbox/navigation-day-v1",
+  zoom: 7.63,
+  center: [16.47487,41.0]
+});
+
+
+
+function fetchStabilimenti(){
+  if(document.getElementById("stabilimenti").checked){
+    fetch('./stabilimenti.geojson')
+    .then((response) => response.json())
+    .then((json) => addMarkers(json));
+  }
+  else{
+    for (let i = 0; i < currentMarkers.length; i++) {
+      currentMarkers[i].remove();
+    }
+  }
+  
+}
+
+var currentMarkers = [];
+
+function addMarkers(data) {
+  for (const feature of data.features) {
+  // create a HTML element for each feature
+  const el = document.createElement('div');
+  el.className = 'marker';
+  // make a marker for each feature and add to the map
+  new mapboxgl.Marker(el)
+  .setLngLat(feature.geometry.coordinates)
+  .setPopup(
+    new mapboxgl.Popup({ offset: 25 }) // add popups
+      .setHTML(
+        `<h3>${feature.properties.nomeoperatore}</h3><h5>${feature.properties.comune}</h5><h5><a href="#">Chiama</a></h5><h5><a href="">Raggiungi la destinazione</h5>`
+      )
+  )
+  .addTo(map);
+  currentMarkers.push(el);
+}
+}
+
+function getLibere(){
+    fetch('./areebalneazione.geojson')
+    .then((response) => response.json())
+    .then((json) => addLibere(json));
+}
+
+
+function addLibere(data) {
+  var i = 0;
+  for (const feature of data.features) {
+    if(document.getElementById("libere").checked){
+  // create a HTML element for each feature
+  const el = document.createElement('div');
+  el.className = 'libere';
+  // make a marker for each feature and add to the map
+  if (map.getSource(feature.properties.id_area) == undefined){
+map.addSource(feature.properties.id_area, {
+'type': 'geojson',
+'data': {
+'type': 'Feature',
+'geometry': {
+'type': 'Polygon',
+// These coordinates outline Maine.
+'coordinates': feature.geometry.coordinates
+}
+}
+});}
+ 
+// Add a new layer to visualize the polygon.
+map.addLayer({
+'id': feature.properties.id_area,
+'type': 'fill',
+'source': feature.properties.id_area, // reference the data source
+'layout': {},
+'paint': {
+'fill-color': '#0080ff', // blue color fill
+'fill-opacity': 0.5
+}
+});
+// Add a black outline around the polygon.
+map.addLayer({
+'id': String(i),
+'type': 'line',
+'source': feature.properties.id_area,
+'layout': {},
+'paint': {
+'line-color': 'green',
+'line-width': 3
+}
+});
+i++;
+}
+else{
+  map.removeLayer(String(i));
+  i++;
+  map.removeLayer(feature.properties.id_area);
+}
+}
+}
+
+// Add a data source containing GeoJSON data.
+
+
+// add markers to map
+
+
+
+    
+</script>
+</body>
+</html>
